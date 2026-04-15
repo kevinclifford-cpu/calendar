@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Year Calendar</title>
+<style>
+  body {
+    font-family: Arial;
+    margin: 0;
+    padding: 10px;
+    background: #f4f4f4;
+  }
+
+  .year {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+
+  .calendar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .month {
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+  .month h3 {
+    text-align: center;
+    margin: 5px 0;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  td, th {
+    text-align: center;
+    font-size: 12px;
+    padding: 2px;
+  }
+
+  th {
+    color: gray;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="year" id="yearTitle"></div>
+<div class="calendar" id="calendar"></div>
+
+<script>
+const year = new Date().getFullYear();
+document.getElementById("yearTitle").innerText = year;
+
+const months = [
+  "Jan","Feb","Mar","Apr","May","Jun",
+  "Jul","Aug","Sep","Oct","Nov","Dec"
+];
+
+function createCalendar(month, year) {
+  let firstDay = new Date(year, month).getDay();
+  let daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  let table = "<table><tr>";
+  let days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+  days.forEach(d => table += "<th>" + d + "</th>");
+  table += "</tr><tr>";
+
+  for (let i = 0; i < firstDay; i++) {
+    table += "<td></td>";
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    if ((firstDay + d - 1) % 7 === 0 && d !== 1) {
+      table += "</tr><tr>";
+    }
+    table += "<td>" + d + "</td>";
+  }
+
+  table += "</tr></table>";
+  return table;
+}
+
+let calendarHTML = "";
+
+for (let m = 0; m < 12; m++) {
+  calendarHTML += `
+    <div class="month">
+      <h3>${months[m]}</h3>
+      ${createCalendar(m, year)}
+    </div>
+  `;
+}
+
+document.getElementById("calendar").innerHTML = calendarHTML;
+</script>
+
+</body>
+</html>
