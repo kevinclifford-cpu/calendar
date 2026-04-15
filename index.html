@@ -2,36 +2,40 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Year Calendar</title>
+<title>Calendar</title>
 <style>
   body {
-    font-family: Arial;
+    font-family: Arial, sans-serif;
     margin: 0;
-    padding: 10px;
+    padding: 12px;
     background: #f4f4f4;
   }
 
-  .year {
-    text-align: center;
-    font-size: 24px;
-    margin-bottom: 10px;
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
   }
 
-  .calendar {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-  }
-
-  .month {
-    background: white;
-    padding: 10px;
+  button {
+    padding: 8px 14px;
+    font-size: 16px;
+    border: none;
     border-radius: 8px;
+    background: #2d89ef;
+    color: white;
   }
 
-  .month h3 {
-    text-align: center;
-    margin: 5px 0;
+  .title {
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  .calendar-box {
+    background: white;
+    border-radius: 10px;
+    padding: 12px;
   }
 
   table {
@@ -39,69 +43,100 @@
     border-collapse: collapse;
   }
 
-  td, th {
+  th, td {
     text-align: center;
-    font-size: 12px;
-    padding: 2px;
+    padding: 10px 4px;
+    font-size: 14px;
   }
 
   th {
-    color: gray;
+    color: #666;
+  }
+
+  td {
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  td:hover {
+    background: #e8f1ff;
+  }
+
+  .empty {
+    background: transparent;
+    cursor: default;
   }
 </style>
 </head>
-
 <body>
 
-<div class="year" id="yearTitle"></div>
-<div class="calendar" id="calendar"></div>
+  <div class="topbar">
+    <button onclick="changeMonth(-1)">◀ Prev</button>
+    <div class="title" id="monthTitle"></div>
+    <button onclick="changeMonth(1)">Next ▶</button>
+  </div>
+
+  <div class="calendar-box">
+    <table id="calendar"></table>
+  </div>
 
 <script>
-const year = new Date().getFullYear();
-document.getElementById("yearTitle").innerText = year;
+  let currentDate = new Date();
 
-const months = [
-  "Jan","Feb","Mar","Apr","May","Jun",
-  "Jul","Aug","Sep","Oct","Nov","Dec"
-];
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
 
-function createCalendar(month, year) {
-  let firstDay = new Date(year, month).getDay();
-  let daysInMonth = new Date(year, month + 1, 0).getDate();
+  function renderCalendar() {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
 
-  let table = "<table><tr>";
-  let days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    document.getElementById("monthTitle").innerText =
+      monthNames[month] + " " + year;
 
-  days.forEach(d => table += "<th>" + d + "</th>");
-  table += "</tr><tr>";
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  for (let i = 0; i < firstDay; i++) {
-    table += "<td></td>";
-  }
-
-  for (let d = 1; d <= daysInMonth; d++) {
-    if ((firstDay + d - 1) % 7 === 0 && d !== 1) {
-      table += "</tr><tr>";
+    let html = "<tr>";
+    const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    for (let day of weekdays) {
+      html += `<th>${day}</th>`;
     }
-    table += "<td>" + d + "</td>";
+    html += "</tr><tr>";
+
+    for (let i = 0; i < firstDay; i++) {
+      html += `<td class="empty"></td>`;
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const cellIndex = firstDay + d - 1;
+      if (cellIndex % 7 === 0 && d !== 1) {
+        html += "</tr><tr>";
+      }
+
+      html += `<td onclick="selectDate(${year}, ${month + 1}, ${d})">${d}</td>`;
+    }
+
+    html += "</tr>";
+    document.getElementById("calendar").innerHTML = html;
   }
 
-  table += "</tr></table>";
-  return table;
-}
+  function changeMonth(step) {
+    currentDate.setMonth(currentDate.getMonth() + step);
+    renderCalendar();
+  }
 
-let calendarHTML = "";
+  function selectDate(y, m, d) {
+    const selected = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    alert("Selected: " + selected);
 
-for (let m = 0; m < 12; m++) {
-  calendarHTML += `
-    <div class="month">
-      <h3>${months[m]}</h3>
-      ${createCalendar(m, year)}
-    </div>
-  `;
-}
+    if (window.ReactNativeWebView) {
+      window.ReactNativeWebView.postMessage(selected);
+    }
+  }
 
-document.getElementById("calendar").innerHTML = calendarHTML;
+  renderCalendar();
 </script>
 
 </body>
